@@ -57,3 +57,28 @@ body {
 .message-input button {
   padding: 8px 12px;
 }
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.user-info h3 {
+  margin: 0 0 10px 0;
+  color: #fff;
+}
+
+.user-info button {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.user-info button:hover {
+  background: #c0392b;
+}
