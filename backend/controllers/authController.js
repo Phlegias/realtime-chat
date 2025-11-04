@@ -27,7 +27,7 @@ export const AuthController = {
             res.json({ token });
         } catch (err) {
             console.error(`ERROR IN REGISTER: ${err.message}`);
-            res.status(500).json({ message: "Server error"});
+            res.status(500).json({ message: "Server error" });
         }
     },
 
@@ -63,7 +63,7 @@ export const AuthController = {
             const [rows] = await db.query("SELECT id, username, email, avatar FROM realtime_chat.users WHERE id = ?", [decoded.id]);
             res.json(rows[0]);
         } catch (err) {
-            res.status(401).json({ message: "Invalid token"});
+            res.status(401).json({ message: "Invalid token" });
         }
     }
 }
