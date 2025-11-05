@@ -1,8 +1,10 @@
 import { io } from "socket.io-client";
 
-export default function connectSocket() {
-    const token = localStorage.getItem("token");
-    return io("http://localhost:5000", {
-        auth: { token }
-    });
-}
+const socket = io("http://localhost:5000", {
+  autoConnect: false, // отключите автоматическое подключение
+  auth: {
+    token: localStorage.getItem("token")
+  }
+});
+
+export default socket;

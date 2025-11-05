@@ -1,21 +1,21 @@
 import { db } from "./db.js";
 
 export const MessageModel = {
-    async create(channelId, senderId, text) {
+    async addMessage(channelId, userId, content) {
         const [result] = await db.query(
-            "INSERT INTO realtime_chat.messages (channel_id, sender_id, text) VALUES (?, ?, ?)", 
-            [channelId, senderId, text]
+            "INSERT INTO realtime_chat.messages (channel_id, user_id, content) VALUES (?, ?, ?)", 
+            [channelId, userId, content]
         );
         return result.insertId;
     },
 
-    async getChannel(channelId) {
+    async getMessagesByChannel(channelId) {
         const [rows] = await db.query(
-            `SELECT messages.*, users.username, users.avatar
-            FROM realtime_chat.messages
-            JOIN realtime_chat.users ON messages.sender_id = users.id
-            WHERE messages.channel_id = ?
-            ORDER BY messages.created_at ASC`, 
+            `SELECT m.id, m.content, m.created_at, u.username
+            FROM messages m
+            JOIN users u ON m.user_id = u.id
+            WHERE m.channel_id = ?
+            ORDER BY m.created_at ASC`,
             [channelId]
         );
         return rows;

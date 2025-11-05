@@ -8,6 +8,7 @@ import channelsRouter from "./routes/channels.js";
 import messagesRouter from "./routes/messages.js";
 import { MessageModel } from "./models/messageModel.js";
 import authRouter from "./routes/auth.js";
+import { create } from "domain";
 
 dotenv.config();
 
@@ -35,25 +36,43 @@ io.use((socket, next) => {
     } catch {
         next(new Error("Invalid token"));
     }
+});
 
-    io.on("connection", (socket) => {
-        console.log("⚡ User connected:", socket.id);
 
-        socket.on("join_channel", (channelId) => {
-            socket.join(`channel_${channelId}`);
-            console.log(`📡 Joined channel ${channelId}`);
-        });
+io.on("connection", (socket) => {
+    console.log("⚡ User connected:", socket.id);
 
-        socket.on("send_message", async ({ channelId, senderId, text }) => {
-            const messageId = await MessageModel.create(channelId, senderId, text);
-            const newMessage = { id: messageId, channelId, senderId, text };
-            io.to(`channel_${channelId}`).emit("new_message", newMessage);
-            console.log("💬 Message sent:", text);
-        });
+    socket.on("join_channel", (channelId) => {
+        socket.join(`channel_${channelId}`);
+        console.log(`📡 joined channel ${channelId}`);
+    });
 
-        socket.on("disconnect", () => {
-            console.log("❌ User disconnected:", socket.id);
-        });
+    socket.on("leave_channel", (channelId) => {
+        socket.leave(`channel_${channelId}`);
+        console.log(`🚪 left channel ${channelId}`)
+    })
+
+    socket.on("send_message", async ({ channelId, userId, username, content }) => {
+        try {
+            const messageId = await MessageModel.addMessage(channelId, userId, content);
+            const messageData = { 
+                id: messageId, 
+                channel_id: channelId, 
+                username, 
+                content,
+                created_at:new Date() 
+            };
+
+            io.to(`channel_${channelId}`).emit("receive_message", messageData);
+            //todo: delete
+            console.log("💬 Message sent:", content);
+        } catch (err) {
+            console.error(`ERROR: can't send a mesage ${err.message}`);
+        }
+    });
+
+    socket.on("disconnect", () => {
+        console.log("❌ User disconnected:", socket.id);
     });
 });
 
