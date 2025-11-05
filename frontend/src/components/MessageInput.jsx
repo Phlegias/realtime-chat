@@ -1,28 +1,24 @@
 import { useState } from "react";
-import socket from "../socket/socket";
 
-export default function MessageInput({ channel, currentUser }) {
+export default function MessageInput({ onSend }) {
     const [text, setText] = useState("");
 
-    const sendMessage = () => {
+    const handleSubmit = (e) => {
+        e.preventDefault();
         if (!text.trim()) return;
-        socket.emit("send_message", {
-            channelId: channel.id,
-            senderId: currentUser.id,
-            text
-        });
+        onSend(text);
         setText("");
     };
 
     return (
-        <div className="message-input">
+        <form className="message-input" onSubmit={handleSubmit}>
             <input
+                type="text"
+                placeholder="Type a message..."
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                placeholder="Type a message..."
-                onKeyDown={(e) => e.key === "Enter" && sendMessage()}
             />
-            <button onClick={sendMessage}>Send</button>
-        </div>
+            <button type="submit">Send</button>
+        </form>
     );
 }

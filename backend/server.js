@@ -4,10 +4,13 @@ import { Server } from "socket.io";
 import cors from "cors";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
+import authRouter from "./routes/auth.js";
 import channelsRouter from "./routes/channels.js";
 import messagesRouter from "./routes/messages.js";
+import { ChannelModel } from "./models/channelModel.js";
 import { MessageModel } from "./models/messageModel.js";
-import authRouter from "./routes/auth.js";
+import { MemberModel } from "./models/memberModel.js";
+
 
 dotenv.config();
 
@@ -35,25 +38,42 @@ io.use((socket, next) => {
     } catch {
         next(new Error("Invalid token"));
     }
+});
 
-    io.on("connection", (socket) => {
-        console.log("⚡ User connected:", socket.id);
 
-        socket.on("join_channel", (channelId) => {
+io.on("connection", (socket) => {
+
+    socket.on("join_channel", async (channelId) => {
+        try {
             socket.join(`channel_${channelId}`);
-            console.log(`📡 Joined channel ${channelId}`);
-        });
+            const isMember = await MemberModel.isMember(channelId, socket.user.id);
+            if (!isMember) await ChannelModel.addMember(channelId, socket.user.id);
+            const members = await MemberModel.getMembers(channelId);
+            io.to(`channel_${channelId}`).emit("update_members", members);
+        } catch (err) {
+            console.error(`Error: can't join channel ${err.message}`);
+        }
+    });
 
-        socket.on("send_message", async ({ channelId, senderId, text }) => {
-            const messageId = await MessageModel.create(channelId, senderId, text);
-            const newMessage = { id: messageId, channelId, senderId, text };
-            io.to(`channel_${channelId}`).emit("new_message", newMessage);
-            console.log("💬 Message sent:", text);
-        });
+    socket.on("leave_channel", (channelId) => {
+        socket.leave(`channel_${channelId}`);
+    })
 
-        socket.on("disconnect", () => {
-            console.log("❌ User disconnected:", socket.id);
-        });
+    socket.on("send_message", async ({ channelId, userId, username, content }) => {
+        try {
+            const messageId = await MessageModel.addMessage(channelId, userId, content);
+            const messageData = { 
+                id: messageId, 
+                channel_id: channelId, 
+                username, 
+                content,
+                created_at:new Date() 
+            };
+
+            io.to(`channel_${channelId}`).emit("receive_message", messageData);
+        } catch (err) {
+            console.error(`ERROR: can't send a mesage ${err.message}`);
+        }
     });
 });
 

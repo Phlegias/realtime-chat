@@ -13,9 +13,11 @@ export default function LoginPage({ onLogin }) {
         try {
             const res = await api.post("/auth/login", { email, password });
             localStorage.setItem("token", res.data.token);
+
             const userRes = await api.get("/auth/me", {
                 headers: { Authorization: `Bearer ${res.data.token}` }
             });
+            
             onLogin(userRes.data);
             navigate("/");
         } catch (err) {

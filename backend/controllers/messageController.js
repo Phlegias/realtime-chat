@@ -2,8 +2,13 @@ import { MessageModel } from "../models/messageModel.js";
 
 export const MessageController = {
     async getByChannel(req, res) {
-        const { channelId } = req.params;
-        const messages = await MessageModel.getChannel(channelId);
-        res.json(messages);
+        try {
+            const { channelId } = req.params;
+            const messages = await MessageModel.getMessagesByChannel(channelId);
+            res.json(messages);
+        } catch (err) {
+            console.error(`ERROR: can't get any messages: ${err.message}`);
+            res.status(500).json({ message: "Failed to get messages" });
+        }
     }
 };

@@ -1,46 +1,82 @@
-import { useEffect, useState } from "react";
-import socket from "../socket/socket.js";
+import { useEffect, useRef , useState } from "react";
 import api from "../api/api.js";
 import MessageInput from "./MessageInput.jsx"
 
-export default function ChatWindow({ channel, currentUser }) {
+export default function ChatWindow({ channel, currentUser, socket }) {
     const [messages, setMessages] = useState([]);
+    const messagesEndRef = useRef(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
 
     useEffect(() => {
         if (!channel) return;
+        let isMounted = true;
 
-        const loadMessages = async () => {
-            const res = await api.get(`/messages/${channel.id}`);
-            setMessages(res.data);
-        };
-
-        loadMessages();
-        socket.emit("join_channel", channel.id);
-
-        socket.on("new_message", (msg) => {
-            if (msg.channelId === channel.id) {
-                setMessages((prev) => [...prev, msg]);
+        api.get(`/messages/${channel.id}`).then((res) => {
+            if (isMounted) {
+                setMessages(res.data)
+                scrollToBottom();
             }
         });
 
-        return () => {
-            socket.off("new_message");
-        };
-    }, [channel]);
+        socket.emit("join_channel", channel.id);
 
-    if (!channel) return <div>Select a channel to start chatting</div>
+        const handleReceive = (msg) => {
+            if (msg.channel_id === channel.id) {
+                setMessages((prev) => [...prev, msg]);
+                scrollToBottom();
+            }
+        };
+
+        socket.on("receive_message", handleReceive);
+
+        return () => {
+            isMounted = false;
+            socket.emit("leave_channel", channel.id);
+            socket.off("receive_message", handleReceive)
+        };
+    }, [channel?.id]);
+
+    const handleSend = (content) => {
+        if (!channel || !content.trim()) return;
+        socket.emit("send_message", {
+            channelId: channel.id,
+            userId: currentUser.id,
+            username: currentUser.username,
+            content
+        });
+    };
+
+    if (!channel) return <div>Select a channel to start chatting</div>;
 
     return (
         <div className="chat-window">
-            <h2>#{channel.name}</h2>
+            <h3>#{channel.name}</h3>
             <div className="messages">
                 {messages.map((m) => (
-                    <div key={m.id} className="message"> 
-                    <strong>{m.username || "User"}:</strong> {m.text}
+                    <div 
+                        key={m.id} 
+                        className={`message ${
+                            m.username === currentUser.username ? "own-message" : "" 
+                        } `}
+                    >
+                        <div className="meta">
+                            <strong>{m.username}:</strong> {" "}
+                            <span className="time">
+                                {new Date(m.created_at).toLocaleTimeString([], {
+                                    hour:"2-digit",
+                                    minute: "2-digit"
+                                })}
+                            </span>
+                        </div>
+                    <div className="text">{m.content}</div>
                 </div>
                 ))}
+                <div ref={messagesEndRef} />
             </div>
-            <MessageInput channel={channel} currentUser={currentUser} />
+            <MessageInput onSend={handleSend} />
         </div>
     );
 }
