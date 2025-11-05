@@ -42,5 +42,13 @@ export const MemberModel = {
             [channelId]
         );
         return rows;
+    },
+
+    async isMember(channelId, userId) {
+        const [rows] = await db.query(
+            "SELECT 1 FROM channel_members WHERE channel_id = ? AND user_id = ? LIMIT 1",
+            [channelId, userId]
+        );
+        return rows.length > 0;
     }
 };

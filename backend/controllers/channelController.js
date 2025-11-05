@@ -38,7 +38,7 @@ export const ChannelController = {
     async getMembers(req, res) {
         try {
             const { id } = req.params;
-            const members = await ChannelModel.getMembers(id);
+            const members = await MemberModel.getMembers(id);
             res.json(members);
         } catch (err) {
             console.error(`ERROR: can't fetch members: ${err.message}`);

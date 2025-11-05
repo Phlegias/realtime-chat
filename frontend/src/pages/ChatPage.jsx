@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSocket } from "../socket/useSocket.js";
 import ChannelList from "../components/ChannelList";
 import ChatWindow from "../components/ChatWindow";
+import ChannelMembers from "../components/ChannelMembers.jsx";
 
 export default function ChatPage({ currentUser }) {
      const socket = useSocket();
@@ -32,20 +33,34 @@ export default function ChatPage({ currentUser }) {
 
     return (
         <div className="chat-page">
+            {/* LEFT PANEL */}
             <div className="sidebar">
                 <div className="user-info">
                     <h3>Welcome, {currentUser.username}</h3>
                     <button onClick={handleLogout}>Logout</button>
                 </div>
-                <ChannelList 
-                currentUser={currentUser} 
-                onSelect={setSelectedChannel} />
+                <ChannelList currentUser={currentUser} onSelect={setSelectedChannel} />
             </div>
-            <div className="main">
-                <ChatWindow 
-                channel={selectedChannel} 
-                currentUser={currentUser} 
-                socket={socket} />
+
+            {/* MAIN CHAT AREA */}
+            <div className="chat-center">
+                <ChatWindow
+                    channel={selectedChannel}
+                    currentUser={currentUser}
+                    socket={socket}
+                />
+            </div>
+
+            {/* RIGHT PANEL — MEMBERS */}
+            <div className="members-panel">
+                {selectedChannel ? (
+                <ChannelMembers
+                    channel={selectedChannel}
+                    socket={socket}
+                />
+                ) : (
+                <div className="empty-members">Select a channel</div>
+                )}
             </div>
         </div>
     );

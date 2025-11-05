@@ -4,11 +4,13 @@ import { Server } from "socket.io";
 import cors from "cors";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
+import authRouter from "./routes/auth.js";
 import channelsRouter from "./routes/channels.js";
 import messagesRouter from "./routes/messages.js";
+import { ChannelModel } from "./models/channelModel.js";
 import { MessageModel } from "./models/messageModel.js";
-import authRouter from "./routes/auth.js";
-import { create } from "domain";
+import { MemberModel } from "./models/memberModel.js";
+
 
 dotenv.config();
 
@@ -40,16 +42,21 @@ io.use((socket, next) => {
 
 
 io.on("connection", (socket) => {
-    console.log("⚡ User connected:", socket.id);
 
-    socket.on("join_channel", (channelId) => {
-        socket.join(`channel_${channelId}`);
-        console.log(`📡 joined channel ${channelId}`);
+    socket.on("join_channel", async (channelId) => {
+        try {
+            socket.join(`channel_${channelId}`);
+            const isMember = await MemberModel.isMember(channelId, socket.user.id);
+            if (!isMember) await ChannelModel.addMember(channelId, socket.user.id);
+            const members = await MemberModel.getMembers(channelId);
+            io.to(`channel_${channelId}`).emit("update_members", members);
+        } catch (err) {
+            console.error(`Error: can't join channel ${err.message}`);
+        }
     });
 
     socket.on("leave_channel", (channelId) => {
         socket.leave(`channel_${channelId}`);
-        console.log(`🚪 left channel ${channelId}`)
     })
 
     socket.on("send_message", async ({ channelId, userId, username, content }) => {
@@ -64,15 +71,9 @@ io.on("connection", (socket) => {
             };
 
             io.to(`channel_${channelId}`).emit("receive_message", messageData);
-            //todo: delete
-            console.log("💬 Message sent:", content);
         } catch (err) {
             console.error(`ERROR: can't send a mesage ${err.message}`);
         }
-    });
-
-    socket.on("disconnect", () => {
-        console.log("❌ User disconnected:", socket.id);
     });
 });
 
