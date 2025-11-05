@@ -1,70 +1,235 @@
+/* === Глобальные настройки текста === */
+* {
+  box-sizing: border-box;
+  font-family: "Inter", "Segoe UI", Roboto, sans-serif;
+  letter-spacing: 0.2px;
+}
+
 body {
   margin: 0;
-  font-family: sans-serif;
-  background: #fafafa;
-}
-
-.channel-list ul {
-  list-style: none;
   padding: 0;
+  background: #f2f3f5;
+  color: #222;
+  font-size: 16px;
+  line-height: 1.5;
 }
 
-.channel-list li {
-  cursor: pointer;
-  padding: 5px 0;
-}
-
-.main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.chat-window {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  background: #f8f8f8;
-  border-left: 1px solid #ddd;
-}
-
-.chat-window h3 {
-  background: #2980b9;
-  color: white;
-  padding: 10px;
-  margin: 0;
-}
-
-.chat-area {
-  flex: 3;
-  border-right: 1px solid #ccc;
-}
-
+/* === Общая сетка страницы === */
 .chat-page {
   display: grid;
-  grid-template-columns: 250px 1fr 250px; /* left - center - right */
+  grid-template-columns: 280px minmax(0, 1fr) 280px; /* центр не выталкивает правую панель */
   height: 100vh;
+  overflow: hidden;
 }
 
+/* === Левая панель === */
 .sidebar {
   background: #1e1f22;
   color: white;
   padding: 16px;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
-.chat-center {
-  background: #f4f5f7;
+.channel-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.channel-list li {
+  display: flex;
+  justify-content: space-between;  
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+  gap: 8px;
+}
+
+.channel-list li:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.channel-list .channel-name {
+  flex: 1;                          /* занимает все свободное пространство */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #fff;
+}
+
+.channel-list button {
+  flex-shrink: 0;                   /* кнопка не сжимается */
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.3s ease;
+}
+
+.channel-list button:hover {
+  background: #217dbb;
+}
+
+
+.create-channel-form {
+  display: flex;
+  flex-direction: column; /* переносим кнопку под поле */
+  gap: 6px;
+  margin-top: 15px;
+  width: 100%;
+}
+
+.create-channel-form input {
+  padding: 10px;
+  font-size: 0.95rem;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+  width: 100%;
+}
+
+.create-channel-form button {
+  background: #3498db;
+  border: none;
+  color: white;
+  padding: 10px 0; /* делает кнопку такой же ширины, как поле */
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  width: 100%;
+}
+
+.create-channel-form button:hover {
+  background: #217dbb;
+}
+
+/* === Центральная зона чата === */
+.chat-window {
   display: flex;
   flex-direction: column;
+  height: 100%;
+  background: #f8f8f8;
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+  overflow: hidden;
 }
 
+.chat-window h3 {
+  background: #2980b9;
+  color: white;
+  padding: 10px 16px;
+  margin: 0;
+  font-size: 18px;
+}
+
+/* === Сообщения === */
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+/* сообщение общее */
+.message {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin-bottom: 14px;
+  max-width: 65%; /* ограничиваем ширину сообщения */
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* аватар */
+.message img.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* пузырь сообщения */
+.message-content {
+  background: white;
+  padding: 10px 14px;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  font-size: 1rem;
+  line-height: 1.4;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+/* свои сообщения */
+.message.own-message {
+  flex-direction: row-reverse;
+  margin-left: auto;
+}
+
+.message.own-message .message-content {
+  background: #dcf8c6;
+}
+
+/* мета-информация */
+.message .meta {
+  font-size: 0.8rem;
+  color: #555;
+}
+
+/* === Поле ввода === */
+.message-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-top: 1px solid #ccc;
+  background: #fff;
+}
+
+.message-input input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.message-input button {
+  background: #2980b9;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.message-input button:hover {
+  background: #1f5f8a;
+}
+
+/* === Правая панель участников === */
 .members-panel {
   background: #fafafa;
   border-left: 1px solid #ddd;
-  padding: 16px;
+  width: 280px;
+  min-width: 280px;
+  padding: 20px;
   overflow-y: auto;
+  flex-shrink: 0; /* запрещаем сжиматься */
+  display: flex;
+  flex-direction: column;
 }
 
 .members-panel h4 {
@@ -75,8 +240,10 @@ body {
 .member-item {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
   gap: 10px;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  word-break: break-word;
 }
 
 .member-item img {
@@ -90,126 +257,56 @@ body {
   font-weight: 500;
 }
 
-
-.members-area {
-  flex: 1;
-  background: #fafafa;
-  padding: 10px;
-  overflow-y: auto;
-}
-
-.channel-members ul {
-  list-style: none;
-  padding: 0;
-}
-
-.channel-members li {
-  margin: 4px 0;
-  font-size: 0.95rem;
-}
-
 .owner-tag {
   color: #f39c12;
   font-size: 0.8rem;
 }
 
-.messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 10px;
-}
-
-.message {
-  background: #fff;
+/* === Универсальный стиль кнопок === */
+button {
+  font-family: "Segoe UI", Roboto, sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 10px 16px;
+  border: none;
   border-radius: 8px;
-  margin-bottom: 8px;
-  padding: 6px 10px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.own-message {
-  background: #dcf8c6;
-  align-self: flex-end;
-}
-
-.message .meta {
-  font-size: 0.8rem;
-  color: #555;
-}
-
-.message .text {
-  font-size: 0.95rem;
-  margin-top: 3px;
-}
-
-.message-input {
-  display: flex;
-  gap: 5px;
-  padding: 10px;
-  border-top: 1px solid #ccc;
-  background: #fff;
-}
-
-.message-input button {
-  background: #2980b9;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 5px;
   cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.message-input button:hover {
-  background: #1f5f8a;
-}
-
-#----------user-------------
-
-.user-info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-bottom: 20px;
-}
-
-.user-info h3 {
-  margin: 0 0 10px 0;
-  color: #fff;
-}
-
-.user-info button {
-  background: #e74c3c;
-  color: white;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.user-info button:hover {
-  background: #c0392b;
-}
-
-.create-channel-form {
-  margin-top: 15px;
-  display: flex;
-  gap: 5px;
-}
-
-.create-channel-form input {
-  flex: 1;
-  padding: 5px;
-}
-
-.create-channel-form button {
+/* Основные кнопки (создать, отправить, подтверждение) */
+button.primary {
   background: #3498db;
   color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 5px;
-  cursor: pointer;
 }
 
-.create-channel-form button:hover {
-  background: #2980b9;
+button.primary:hover {
+  background: #217dbb;
+  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.4);
+}
+
+/* Второстепенные кнопки (например, отмена, вспомогательные действия) */
+button.secondary {
+  background: #ecf0f1;
+  color: #2c3e50;
+}
+
+button.secondary:hover {
+  background: #d0d7da;
+}
+
+/* Опасные кнопки (logout, delete) */
+button.danger {
+  background: #e74c3c;
+  color: white;
+}
+
+button.danger:hover {
+  background: #c0392b;
+  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.4);
+}
+
+button:active {
+  transform: scale(0.98);
 }
