@@ -37,7 +37,7 @@ export default function ChatPage({ currentUser }) {
             <div className="sidebar">
                 <div className="user-info">
                     <h3>Welcome, {currentUser.username}</h3>
-                    <button onClick={handleLogout}>Logout</button>
+                    <button className="danger" onClick={handleLogout}>Logout</button>
                 </div>
                 <ChannelList currentUser={currentUser} onSelect={setSelectedChannel} />
             </div>

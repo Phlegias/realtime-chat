@@ -6,7 +6,7 @@ export default function ChannelList({ onSelect, currentUser }) {
     const [channels, setChannels] = useState([]);
     const [publicChannels, setPublicChannels] = useState([]);
     
-    const loadChannels = async () => { 
+    const loadChannels = async () => {
         const res = await api.get(`/channels?userId=${currentUser.id}`);
         setChannels(res.data);
     };
@@ -42,18 +42,31 @@ export default function ChannelList({ onSelect, currentUser }) {
             </ul>
 
             <h4>Create new channel</h4>
-            <CreateChannelForm currentUser={currentUser} onCreated={handleChannelCreated} />
+            <CreateChannelForm
+                currentUser={currentUser}
+                onCreated={handleChannelCreated}
+            />
 
             <h4>Public Channels</h4>
             <ul>
-                {publicChannels.map((ch) =>(
-                    <li key={ch.id}>
-                        #{ch.name}{" "}
-                        {!channels.find((c) => c.id === ch.id) && (
-                            <button onClick={() => joinChannel(ch.id)}>Join</button>
-                        )}
-                    </li>
-                ))}
+                {publicChannels.map((ch) => {
+                    const isJoined = channels.find((c) => c.id === ch.id);
+                    return (
+                        <li key={ch.id}>
+                            {!isJoined && (
+                                <button
+                                    className="join-btn"
+                                    onClick={() => joinChannel(ch.id)}
+                                >
+                                Join
+                                </button>
+                            )}
+                            <span className="channel-name" title={ch.name}>
+                                #{ch.name}
+                            </span>
+                        </li>
+                    );
+                })}
             </ul>
         </div>
     );

@@ -18,7 +18,7 @@ export default function MessageInput({ onSend }) {
                 value={text}
                 onChange={(e) => setText(e.target.value)}
             />
-            <button type="submit">Send</button>
+            <button type="submit" className="primary">Send</button>
         </form>
     );
 }

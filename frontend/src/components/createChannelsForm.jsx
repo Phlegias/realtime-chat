@@ -36,8 +36,8 @@ export default function CreateChannelForm({ currentUser, onCreated }) {
                 placeholder="New channel name..."
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-            />
-            <button type="submit" disabled={loading}>
+            /> <br/>
+            <button type="submit" className="primary" disabled={loading}>
                 {loading ? "Creating..." : "Create"}
             </button>
             {error && <p className="error">{error}</p>}
