@@ -28,5 +28,5 @@ Users can create channels, join existing ones, and exchange messages in real tim
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/realtime-chat.git
+git clone https://github.com/Phlegias/realtime-chat.git
 cd realtime-chat
